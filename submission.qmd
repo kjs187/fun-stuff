@@ -1,0 +1,227 @@
+---
+title: "Assignment 3 | DataViz 5200-03"
+author: "Kelsey Szafranski"
+date: "2025-02-05"
+format:
+  html:
+    toc: true
+    toc-title: "Contents"
+    number-sections: false
+    code-fold: false
+    code-tools: true
+    fig-cap-location: top
+    fig-align: center
+    fig-num: true
+fontsize: 12pt
+linestretch: 1.5
+theme:
+    dark: darkly
+    light: flatly
+execute:
+  echo: false
+  warning: false
+  message: false
+editor: visual
+include-in-header:
+  - file: github-corner.html
+---
+
+
+# **White Hat vs. Black Hat Visualizations 🎩 ** 
+
+Data visualizations can be used to **inform** or **manipulate** public perception.  
+In this assignment, we explore two perspectives:  
+
+- **White Hat Visualization**: Presents data **accurately** and **transparently**.  
+- **Black Hat Visualization**: Distorts data to **mislead the audience subtly**.
+
+---
+
+## **1. Data Preparation**
+
+The dataset was **processed and cleaned** using `data-munging.R`.  
+
+- **White Hat dataset**: Maintains **all relevant context** without distortion.  
+- **Black Hat dataset**: **Exaggerates** trends and **removes context** to mislead the audience.
+
+::: {.callout-note collapse="true"}
+Data has been successfully processed. White Hat and Black Hat datasets are ready for visualization. 
+:::
+
+---
+
+## **2. White Hat Visualization (R)**
+
+This visualization provides a **clear, objective** representation of mass shooting fatalities over time.  
+A **rolling average** is used to smooth out yearly fluctuations and improve readability.
+
+::: {.callout-tip}
+### **Key Features**:
+
+- **Accurate scale & labels**  
+- **No omitted data points**  
+- **Neutral title & colors**  
+- **Source attribution included**  
+:::
+
+::: {.panel-tabset}
+### Visualization📊
+```{r white-hat-plot}
+#| label: white-hat-plot
+#| fig-cap: "Mass Shooting Fatalities in the U.S. (1982–2024)"
+
+# Load necessary libraries
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(zoo)
+
+# Load the dataset
+white_hat_data <- read_csv("data/white-hat-data.csv", show_col_types = FALSE)
+
+# Compute a rolling average for trend clarity
+white_hat_data <- white_hat_data %>%
+  arrange(year) %>%
+  mutate(rolling_avg_fatalities = rollmean(fatalities, k = 3, fill = NA, align = "right"))
+
+# Create White Hat visualization
+ggplot(white_hat_data, aes(x = year)) +
+  geom_line(aes(y = fatalities), color = "blue", size = 1, alpha = 0.5, linetype = "dashed") +
+  geom_line(aes(y = rolling_avg_fatalities), color = "red", size = 1.2) +
+  geom_point(aes(y = fatalities), color = "blue", size = 2) +
+  labs(
+    title = "Mass Shooting Fatalities in the U.S. (1982–2024)",
+    subtitle = "Rolling average helps visualize trends clearly.",
+    x = "Year",
+    y = "Total Fatalities",
+    caption = "Source: Mother Jones Mass Shooting Database (1982–2024)"
+  ) +
+  theme_minimal()
+
+```
+### Summary ✏️
+
+This visualization provides an objective, transparent, and well-labeled representation of mass shooting fatalities. To ensure accuracy, the axes are clearly labeled with "Total Fatalities," making it easy to interpret the data without misrepresentation. Instead of displaying raw yearly data, which can fluctuate significantly, a three-year rolling average is applied to smooth out variations and highlight overall trends more clearly. The color scheme was deliberately chosen to remain neutral, using blue and red with subtle differentiation to avoid any unintended bias while maintaining visual contrast. Additionally, no years were omitted from the dataset, ensuring that the visualization presents a complete and fair representation of historical trends. Finally, the source of the data is clearly cited, reinforcing transparency and credibility. This approach ensures that the visualization is both ethically constructed and easily interpretable, allowing viewers to engage with the information without manipulation or distortion.
+
+:::
+
+---
+
+## **3. Black Hat Visualization (Python)**
+
+This visualization **manipulates the data** to **exaggerate** the rise in mass shooting fatalities.  
+
+- **Fatalities are artificially increased** to make trends appear worse.  
+- **Data before 2000 is removed** to hide historical context.  
+- **Fear-based labels and colors** create a sense of urgency.  
+
+::: {.callout-warning .callout-fix collapse="true"}
+### **Deceptive Techniques Used (click to reveal)**
+- **🚨Exaggerated trends using scaling tricks**
+- **🚨Hid historical data to distort perception**
+- **🚨Used misleading axis labels & alarmist titles**
+:::
+
+::: {.black-section}
+
+::: {.panel-tabset}
+### Visualization 📊 
+```{python black-hat-plot}
+#| label: black-hat-plot
+#| fig-cap: "Alarming Rise in Mass Shooting Fatalities Since 2000!"
+#| echo: false
+#| warning: false
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the dataset
+black_hat_data = pd.read_csv("data/black-hat-data.csv")
+
+# Apply manipulations
+black_hat_data["manipulated_fatalities"] = black_hat_data["fatalities"] ** 1.2  # Artificially exaggerate increase
+black_hat_data = black_hat_data[black_hat_data["year"] >= 2000]  # Remove pre-2000 context
+
+# Create misleading visualization
+plt.figure(figsize=(10, 5))
+plt.plot(black_hat_data["year"], black_hat_data["manipulated_fatalities"], color="red", linewidth=3, marker="o")
+
+# Skewed axis scaling
+plt.ylim(min(black_hat_data["manipulated_fatalities"]), max(black_hat_data["manipulated_fatalities"]) * 1.3)
+
+# Misleading labels
+plt.title("Alarming Rise in Mass Shooting Fatalities Since 2000!", fontsize=14, fontweight="bold", color="darkred")
+plt.xlabel("Year", fontsize=12, fontweight="bold")
+plt.ylabel("Fatalities per Year (Projected)", fontsize=12, fontweight="bold")
+plt.grid(False)
+
+# Hide some context
+plt.text(2010, max(black_hat_data["manipulated_fatalities"]) * 0.8, "Crisis Escalating!", fontsize=12, color="darkred")
+
+plt.show()
+
+```
+### Summary ✏️	
+
+This visualization is designed to subtly manipulate the viewer’s perception by exaggerating trends and evoking a sense of urgency. To achieve this, the fatalities data has been artificially increased using an exponentiation function, making the rise in deaths appear far more dramatic than it actually is. Additionally, all data before the year 2000 has been removed, effectively erasing historical context that might have provided a more balanced perspective. The y-axis has also been carefully adjusted to stretch the vertical space, making even small fluctuations seem significant. Instead of a neutral title, the visualization uses alarmist phrasing, such as "Alarming Rise in Mass Shooting Fatalities Since 2000!" to create a sense of panic. The color scheme reinforces this fear-based approach, with aggressive red tones that subconsciously signal danger and urgency. To further guide the viewer’s interpretation, a strategically placed label reading "Crisis Escalating!" directs attention toward the upward trend. While none of these techniques involve outright fabrication, they work together to create a misleading but seemingly credible narrative that subtly distorts the audience's perception of the data.
+:::
+
+:::
+
+---
+
+## **4. Conclusion**
+
+This exercise demonstrates how **data visualizations influence perception, where:** 
+
+::: {.grid}
+::: {.g-col-6}
+🤩 **<u>White Hat Visualizations</u>**  
+
+- Prioritize **clarity, transparency, and fairness**  
+- Provide **honest representation of trends**  
+- Ensure **proper scaling and labeling**  
+:::
+  
+::: {.g-col-6}
+😒 **<u>Black Hat Visualizations</u>**  
+
+- Exploit **biases and distort trends**  
+- Use **manipulative scaling & misleading labels**  
+- Influence viewer perception **subtly**  
+:::
+:::
+
+`Note:` Understanding these techniques is essential for **identifying misleading charts** in media, policymaking, and data-driven decision-making.
+
+---
+
+## **5. References**
+
+::: {.callout-note}
+### **Sources Cited**
+The table below lists all sources used in this report.
+:::
+
+```{r references-table, echo=FALSE, results="asis"}
+library(gt)
+library(tibble)  # Ensure tibble is loaded
+
+references <- tibble(
+  Source = c("Mother Jones Mass Shooting Database", 
+             "Tufte, E. R. (2001)", 
+             "Cairo, A. (2016)",
+             "GitHub Corner Reference"),  # ✅ Added new reference
+  Title = c("Mass Shooting Database (1982–2024)", 
+            "The Visual Display of Quantitative Information", 
+            "The Truthful Art: Data, Charts, and Maps for Communication",
+            "[GitHub Corner Documentation](https://github.com/holtzy/quarto-tricks/blob/main/github-corner/index.qmd)") # ✅ Clickable link added
+)
+
+references %>% 
+  gt() %>%
+  tab_header(title = md("**References**")) %>%  # ✅ Use md() to enable Markdown formatting
+  cols_label(Source = "Source", Title = "Publication") %>%
+  fmt_markdown(columns = Title)  # ✅ Ensures links render properly
+```
